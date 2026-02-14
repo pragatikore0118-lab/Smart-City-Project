@@ -1,0 +1,56 @@
+#include <WiFi.h>
+#include <Firebase_ESP_Client.h>
+
+// WiFi
+#define WIFI_SSID "ir"
+#define WIFI_PASSWORD "irsensor"
+
+// Firebase
+#define API_KEY "AIzaSyDnUeG2gHzirNQLEWmIVb3B0iSOKBndS88"
+#define DATABASE_URL "https://irsensor-7092f-default-rtdb.firebaseio.com"
+
+#define USER_EMAIL "bharamshettivivek71@gmail.com"
+#define USER_PASSWORD "vivek@#1998"
+
+// Firebase objects
+FirebaseData fbdo;
+FirebaseAuth auth;
+FirebaseConfig config;
+
+int irPin = 4;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(irPin, INPUT);
+
+  // Connect WiFi
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(300);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi Connected");
+
+  // Firebase config
+  config.api_key = API_KEY;
+  config.database_url = DATABASE_URL;
+
+  auth.user.email = USER_EMAIL;
+  auth.user.password = USER_PASSWORD;
+
+  Firebase.begin(&config, &auth);
+  Firebase.reconnectWiFi(true);
+}
+
+void loop() {
+  int irStatus = digitalRead(irPin);
+
+  Serial.print("IR Status: ");
+  Serial.println(irStatus);
+
+  if (Firebase.ready()) {
+    Firebase.RTDB.setInt(&fbdo, "/irSensor/status", irStatus);
+  }
+
+  delay(2000);
+}

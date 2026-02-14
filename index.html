@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>IR Detection Counter</title>
+  <style>
+  </style>
+</head>
+<body>
+
+  <div class="box">
+    <h2>IR Detection Count</h2>
+    <div id="count">0</div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDnUeG2gHzirNQLEWmIVb3B0iSOKBndS88",
+      authDomain: "irsensor-7092f.firebaseapp.com",
+      databaseURL: "https://rain-sensing-detector-default-rtdb.asia-southeast1.firebasedatabase.com",
+      projectId: "irsensor-7092f",
+      storageBucket: "irsensor-7092f.firebasestorage.app",
+      messagingSenderId: "645433555193",
+      appId: "1:645433555193:web:2d0eb12f0686d042288a28"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const countEl = document.getElementById("count");
+    const irRef = ref(db, "irSensor/status");
+
+    let count = 0;
+    let lastStatus = 0;
+
+    onValue(irRef, (snapshot) => {
+      const currentStatus = snapshot.val() || 0;
+
+      // Count only when 0 → 1 transition happens
+      if (lastStatus === 0 && currentStatus === 1) {
+        count++;
+        countEl.textContent = count;
+      }
+
+      lastStatus = currentStatus;
+    });
+  </script>
+
+</body>
+</html>
